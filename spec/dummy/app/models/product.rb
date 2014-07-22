@@ -39,4 +39,10 @@ class Product < ActiveRecord::Base
     :less_than_or_equal_to => 100,
     :message => 'Must be greater than zero and less than $100',
   }
+
+  validates :validates_method_amount, :money => {
+    :greater_than => Proc.new { |m| Money.new(0, MoneyRails.default_currency) },
+    :less_than_or_equal_to => Proc.new { |m| Money.new(100, MoneyRails.default_currency) },
+    :message => 'Must be greater than zero and less than $100',
+  }
 end

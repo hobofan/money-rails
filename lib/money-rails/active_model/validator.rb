@@ -2,6 +2,23 @@ module MoneyRails
   module ActiveModel
     class MoneyValidator < ::ActiveModel::Validations::NumericalityValidator
       def validate_each(record, attr, value)
+        if value.is_a?(Money)
+          options.slice(*CHECKS.keys).each do |option, option_value|
+            case option_value
+            when Proc
+              option_value = option_value.call(record)
+            when Symbol
+              option_value = record.send(option_value)
+            end
+
+            if option_value.is_a?(Money)
+              unless value.send(CHECKS[option], option_value)
+                record.errors.add(attr, option, filtered_options(value).merge!(count: option_value.format))
+              end
+              return
+            end
+          end
+        end
 
         # If subunit is not set then no need to validate as it is an
         # indicator that no assignment has been done onto the virtual
