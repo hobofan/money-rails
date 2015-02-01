@@ -5,6 +5,9 @@ class Product < ActiveRecord::Base
   # Use money-rails macros
   monetize :price_cents
 
+  # Use money-rails macro with multiple fields
+  monetize :delivery_fee_cents, :restock_fee_cents, :allow_nil => true
+
   # Use a custom name for the Money attribute
   monetize :discount, :as => "discount_value"
 
@@ -29,20 +32,21 @@ class Product < ActiveRecord::Base
       :message => "Must be greater than zero and less than $100"
     }
 
-  attr_accessor :invalid_price_cents
-  monetize :invalid_price_cents, disable_validation: true
+  attr_accessor :accessor_price_cents
+  monetize :accessor_price_cents, disable_validation: true
 
   monetize :validates_method_amount_cents, allow_nil: true
 
   validates :validates_method_amount, :money => {
     :greater_than => 0,
-    :less_than_or_equal_to => 100,
+    :less_than_or_equal_to => ->(product) { product.optional_price.to_f },
     :message => 'Must be greater than zero and less than $100',
-  }
+  }, allow_nil: true
 
-  validates :validates_method_amount, :money => {
-    :greater_than => Proc.new { |m| Money.new(0, MoneyRails.default_currency) },
-    :less_than_or_equal_to => Proc.new { |m| Money.new(100, MoneyRails.default_currency) },
-    :message => 'Must be greater than zero and less than $100',
-  }
+  alias_attribute :renamed_cents, :aliased_cents
+
+  monetize :renamed_cents, allow_nil: true
+
+  # Using postfix to determine currency column (reduced_price_currency)
+  monetize :reduced_price_cents, :allow_nil => true
 end

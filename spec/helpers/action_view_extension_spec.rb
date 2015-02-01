@@ -1,62 +1,77 @@
 require 'spec_helper'
 
-describe 'MoneyRails::ActionViewExtension' do
+describe 'MoneyRails::ActionViewExtension', :type => :helper do
   describe '#currency_symbol' do
     subject { helper.currency_symbol }
-    it { should be_a String }
-    it { should include Money.default_currency.symbol }
+    it { is_expected.to be_a String }
+    it { is_expected.to include Money.default_currency.symbol }
   end
 
   describe '#humanized_money' do
+    let(:money_object){ Money.new(12500) }
     let(:options) { {} }
-    subject { helper.humanized_money Money.new(12500), options }
-    it { should be_a String }
-    it { should_not include Money.default_currency.symbol }
-    it { should_not include Money.default_currency.decimal_mark }
+    subject { helper.humanized_money money_object, options }
+    it { is_expected.to be_a String }
+    it { is_expected.not_to include Money.default_currency.symbol }
+    it { is_expected.not_to include Money.default_currency.decimal_mark }
 
     context 'with symbol options' do
       let(:options) { { :symbol => true } }
-      it { should include Money.default_currency.symbol }
+      it { is_expected.to include Money.default_currency.symbol }
     end
 
     context 'with deprecated symbol' do
       let(:options) { true }
       before(:each) do
-        helper.should_receive(:warn)
+        expect(helper).to receive(:warn)
       end
-      it { should include Money.default_currency.symbol }
+      it { is_expected.to include Money.default_currency.symbol }
+    end
+
+    context 'with a currency with an alternate symbol' do
+      let(:money_object) { Money.new(125_00, 'SGD') }
+
+      context 'with symbol options' do
+        let(:options) { { :symbol => true } }
+        it { is_expected.to include Money::Currency.new(:sgd).symbol }
+
+        context 'with disambiguate options' do
+          let(:options) { { :symbol => true, :disambiguate => true } }
+          it { is_expected.to include Money::Currency.new(:sgd).disambiguate_symbol }
+        end
+      end
     end
   end
 
   describe '#humanized_money_with_symbol' do
     subject { helper.humanized_money_with_symbol Money.new(12500) }
-    it { should be_a String }
-    it { should_not include Money.default_currency.decimal_mark }
-    it { should include Money.default_currency.symbol }
+    it { is_expected.to be_a String }
+    it { is_expected.not_to include Money.default_currency.decimal_mark }
+    it { is_expected.to include Money.default_currency.symbol }
   end
 
   describe '#money_without_cents' do
     let(:options) { {} }
     subject { helper.money_without_cents Money.new(12500), options }
-    it { should be_a String }
-    it { should_not include Money.default_currency.symbol }
-    it { should_not include Money.default_currency.decimal_mark }
+    it { is_expected.to be_a String }
+    it { is_expected.not_to include Money.default_currency.symbol }
+    it { is_expected.not_to include Money.default_currency.decimal_mark }
 
     context 'with deprecated symbol' do
       let(:options) { true }
       before(:each) do
-        helper.should_receive(:warn)
+        expect(helper).to receive(:warn)
       end
-      it { should include Money.default_currency.symbol }
+      it { is_expected.to include Money.default_currency.symbol }
     end
   end
 
   describe '#money_without_cents_and_with_symbol' do
     subject { helper.money_without_cents_and_with_symbol Money.new(12500) }
-    it { should be_a String }
-    it { should_not include Money.default_currency.decimal_mark }
-    it { should include Money.default_currency.symbol }
-    it { should_not include "00" }
+    it { is_expected.to be_a String }
+    it { is_expected.not_to include Money.default_currency.decimal_mark }
+    it { is_expected.to include Money.default_currency.symbol }
+    it { is_expected.not_to include "00" }
   end
 
   context 'respects MoneyRails::Configuration settings' do
@@ -70,18 +85,18 @@ describe 'MoneyRails::ActionViewExtension' do
 
       describe '#humanized_money' do
         subject { helper.humanized_money Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should_not include Money.default_currency.symbol }
-        it { should include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.not_to include Money.default_currency.symbol }
+        it { is_expected.to include "00" }
       end
 
       describe '#humanized_money_with_symbol' do
         subject { helper.humanized_money_with_symbol Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should include Money.default_currency.symbol }
-        it { should include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.to include Money.default_currency.symbol }
+        it { is_expected.to include "00" }
       end
     end
 
@@ -95,18 +110,18 @@ describe 'MoneyRails::ActionViewExtension' do
 
       describe '#humanized_money' do
         subject { helper.humanized_money Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should_not include Money.default_currency.symbol }
-        it { should_not include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.not_to include Money.default_currency.symbol }
+        it { is_expected.not_to include "00" }
       end
 
       describe '#humanized_money_with_symbol' do
         subject { helper.humanized_money_with_symbol Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should include Money.default_currency.symbol }
-        it { should_not include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.to include Money.default_currency.symbol }
+        it { is_expected.not_to include "00" }
       end
     end
 
@@ -120,18 +135,18 @@ describe 'MoneyRails::ActionViewExtension' do
 
       describe '#humanized_money' do
         subject { helper.humanized_money Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should_not include Money.default_currency.symbol }
-        it { should_not include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.not_to include Money.default_currency.symbol }
+        it { is_expected.not_to include "00" }
       end
 
       describe '#humanized_money_with_symbol' do
         subject { helper.humanized_money_with_symbol Money.new(12500) }
-        it { should be_a String }
-        it { should_not include Money.default_currency.decimal_mark }
-        it { should include Money.default_currency.symbol }
-        it { should_not include "00" }
+        it { is_expected.to be_a String }
+        it { is_expected.not_to include Money.default_currency.decimal_mark }
+        it { is_expected.to include Money.default_currency.symbol }
+        it { is_expected.not_to include "00" }
       end
     end
 
